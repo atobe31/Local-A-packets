@@ -1230,22 +1230,6 @@ def orders(E):
                 result.append(tuple([E0[0]] + list(E2)))
         return(result)
 
-
-#def xu(E): 
-#    """
-#    Non-vanishing criterion.
-#    Input: E
-#        E (extended multi-segment)
-#    Output: True or False
-#            rep(E) != 0
-#    """
-#    e = 1
-#    for E0 in orders(E): 
-#        if not nec(E0):
-#            e = 0
-#            break
-#    return e == 1
-
 def nonzero(E,e):         
     s = 1
     for i in range(len(E)): 
@@ -1438,36 +1422,6 @@ def A_packet(P,e):
                     F[t+k] = (F[t+k][0], F[t+k][1], -F[t+k][2])
                 Pi.append(tuple(F))
         t = t+T[i][1]
-#    t = 0            
-#    for j in range(len(Pi)): 
-#        F = Pi[j-t]
-#        s = 1
-#        for i in range(len(P)): 
-#            b = F[i][0][0]-F[i][0][1]+1
-#            s = (-1)^(int(b/2) + F[i][1]) * F[i][2]^b * s
-#        if s != e: 
-#            del Pi[j-t]
-#            t = t+1
-#    t = 0
-#    for j in range(len(Pi)): 
-#        F = Pi[j-t]
-#        for i in range(len(P)): 
-#            if F[i][0][1]+F[i][1] <= -1: 
-#                del Pi[j-t]
-#                t = t+1
-#                break
-#    t = 0
-#    for j in range(len(Pi)): 
-#        F = Pi[j-t]
-#        for i in range(len(P)):
-#            d = 0
-#            for k in range(i): 
-#                d = d + (F[k][0][0]+F[k][0][1]+1)
-#            if (F[i][0][1] + F[i][1]) == -1/2 and F[i][2] != (-1)^d: 
-#                del Pi[j-t]
-#                t = t+1
-#                break
-#    Pi = list(filter(lambda F: xu(F), Pi))
     Pi = list(filter(lambda F: nonzero(F,e), Pi))
     return Pi
 

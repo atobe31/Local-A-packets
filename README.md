@@ -9,8 +9,8 @@ By this code, one can compute the following:
 - Local A-packets of classical groups; 
 - Characters of component groups associated to extended multi-segments;
 - Aubert duals of extended multi-segments; 
-- The strongly equivalence class of a given extended multi-segments;
-- To determine if a given irreducible representation is of Arthur type or not; 
+- The strongly equivalence class of a given extended multi-segment;
+- Determination if a given irreducible representation is of Arthur type or not; 
 - Decomposition of the socles of the representations parabolically induced from shifted Speh representations and representations of Arthur type; 
 - Irreducibility of such parabolically induced representations; 
 - First reducibility point for such parabolically induced representations. 

@@ -1507,8 +1507,8 @@ def symbol(E):
                     v.append(" - ")
         X = np.append(X,v)
     X = X.reshape(n+1,A0-B0+1)
-#    print(X)
-    return X
+    print(X)
+#    return X
 
 ###########################################################
 # The associated A-parameter for E.

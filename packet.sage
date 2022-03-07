@@ -19,24 +19,6 @@ def Notation():
     print("")
     print("E = (([A_1,B_1],l_1,eta_1), ... ,([A_m,B_m],l_m,eta_m)) is an extended multi-segment.")
 
-def Contents():
-    print("The best matching functions, derivatives and socles for GL(n).")
-    print("The derivatives and socles for G.")
-    print("The Aubert duals for G")
-    print("The multi-segment representations and the local A-packets")
-    print("The symbol, parameter, character and dual for E")
-    print("Strongly equivalence classes and Is_Arthur")
-    print("Speh times Arthur")
-
-
-def title():
-    print("   Title of this talk ")
-    print("     Hiraku Atobe (Hokkaido University)")
-
-def end():
-    print("   Thank you very much!")
-
-
 psi = ((2,2),(5,3))
 psi1 = ((1,6),(1,2),(4,1))
 psi2 = ((51,31),(31,45),(13,5))
@@ -1249,20 +1231,41 @@ def orders(E):
         return(result)
 
 
-def xu(E): 
-    """
-    Non-vanishing criterion.
-    Input: E
-        E (extended multi-segment)
-    Output: True or False
-            rep(E) != 0
-    """
-    e = 1
-    for E0 in orders(E): 
+#def xu(E): 
+#    """
+#    Non-vanishing criterion.
+#    Input: E
+#        E (extended multi-segment)
+#    Output: True or False
+#            rep(E) != 0
+#    """
+#    e = 1
+#    for E0 in orders(E): 
+#        if not nec(E0):
+#            e = 0
+#            break
+#    return e == 1
+
+def nonzero(E,e):         
+    s = 1
+    for i in range(len(E)): 
+        b = E[i][0][0]-E[i][0][1]+1
+        s = (-1)^(int(b/2) + E[i][1]) * E[i][2]^b * s
+    if s != e: 
+            return False
+    for i in range(len(E)): 
+        if E[i][0][1]+E[i][1] <= -1: 
+            return False
+    for i in range(len(E)):
+        d = 0
+        for k in range(i): 
+            d = d + (E[k][0][0]+E[k][0][1]+1)
+        if (E[i][0][1] + E[i][1]) == -1/2 and E[i][2] != (-1)^d: 
+            return False
+    for E0 in orders(E):
         if not nec(E0):
-            e = 0
-            break
-    return e == 1
+            return False
+    return True
 
 
 ###########################################################
@@ -1381,7 +1384,7 @@ def deform(E,i):
 # A-packets for G.
 ###########################################################
 
-def Packet(P,e):
+def A_packet(P,e):
     """
     A-packet associated to P.
     Input: (P,e)
@@ -1435,40 +1438,41 @@ def Packet(P,e):
                     F[t+k] = (F[t+k][0], F[t+k][1], -F[t+k][2])
                 Pi.append(tuple(F))
         t = t+T[i][1]
-    t = 0            
-    for j in range(len(Pi)): 
-        F = Pi[j-t]
-        s = 1
-        for i in range(len(P)): 
-            b = F[i][0][0]-F[i][0][1]+1
-            s = (-1)^(int(b/2) + F[i][1]) * F[i][2]^b * s
-        if s != e: 
-            del Pi[j-t]
-            t = t+1
-    t = 0
-    for j in range(len(Pi)): 
-        F = Pi[j-t]
-        for i in range(len(P)): 
-            if F[i][0][1]+F[i][1] <= -1: 
-                del Pi[j-t]
-                t = t+1
-                break
-    t = 0
-    for j in range(len(Pi)): 
-        F = Pi[j-t]
-        for i in range(len(P)):
-            alpha = 0
-            for k in range(i): 
-                alpha = alpha + (F[k][0][0]+F[k][0][1]+1)
-            if F[i][0][1] + F[i][1] == -1/2 and F[i][2] != (-1)^alpha: 
-                del P[j-t]
-                t = t+1
-                break
-    Pi = list(filter(lambda F: xu(F), Pi))
+#    t = 0            
+#    for j in range(len(Pi)): 
+#        F = Pi[j-t]
+#        s = 1
+#        for i in range(len(P)): 
+#            b = F[i][0][0]-F[i][0][1]+1
+#            s = (-1)^(int(b/2) + F[i][1]) * F[i][2]^b * s
+#        if s != e: 
+#            del Pi[j-t]
+#            t = t+1
+#    t = 0
+#    for j in range(len(Pi)): 
+#        F = Pi[j-t]
+#        for i in range(len(P)): 
+#            if F[i][0][1]+F[i][1] <= -1: 
+#                del Pi[j-t]
+#                t = t+1
+#                break
+#    t = 0
+#    for j in range(len(Pi)): 
+#        F = Pi[j-t]
+#        for i in range(len(P)):
+#            d = 0
+#            for k in range(i): 
+#                d = d + (F[k][0][0]+F[k][0][1]+1)
+#            if (F[i][0][1] + F[i][1]) == -1/2 and F[i][2] != (-1)^d: 
+#                del Pi[j-t]
+#                t = t+1
+#                break
+#    Pi = list(filter(lambda F: xu(F), Pi))
+    Pi = list(filter(lambda F: nonzero(F,e), Pi))
     return Pi
 
 
-def LP(phi,e):
+def L_packet(phi,e):
     """
     L-packet associated to phi
     Input: (phi,e)
@@ -1477,7 +1481,7 @@ def LP(phi,e):
     Output: Pi
         Pi (tempered L-packet)
     """
-    return [rep(E)[1] for E in Packet(phi,e)] 
+    return [rep(E)[1] for E in A_packet(phi,e)] 
 
 
 ###########################################################
@@ -1503,19 +1507,54 @@ def symbol(E):
         e = E[i][2]
         for j in range(A0-B0+1):
             if B0+j < B or B0+j > A:
-                v.append(" ")
+                if B0+j < 0 and (2*B0) % 2 == 0:
+                    v.append("  ")
+                if B0+j >= 0 and (2*B0) % 2 == 0:
+                    v.append(" ")
+                if B0+j < 0 and (2*B0) % 2 == 1:
+                    v.append("    ")
+                if B0+j >= 0 and (2*B0) % 2 == 1:
+                    v.append("   ")
             elif B0+j-B < l:
-                v.append("<")
+                if B0+j < 0 and (2*B0) % 2 == 0:
+                    v.append(" <")
+                if B0+j >= 0 and (2*B0) % 2 == 0: 
+                    v.append("<")
+                if B0+j < 0 and (2*B0) % 2 == 1:
+                    v.append("  < ")
+                if B0+j >= 0 and (2*B0) % 2 == 1: 
+                    v.append(" < ")
             elif A-(B0+j) < l:
-                v.append(">")
+                if B0+j < 0 and (2*B0) % 2 == 0:
+                    v.append(" >")
+                if B0+j >= 0 and (2*B0) % 2 == 0:
+                    v.append(">")
+                if B0+j < 0 and (2*B0) % 2 == 1:
+                    v.append("  > ")
+                if B0+j >= 0 and (2*B0) % 2 == 1:
+                    v.append(" > ")
             elif (-1)^(B0+j-l-B) == e:
-                v.append("+")
+                if B0+j < 0 and (2*B0) % 2 == 0:
+                    v.append(" +")
+                if B0+j >= 0 and (2*B0) % 2 == 0:
+                    v.append("+")
+                if B0+j < 0 and (2*B0) % 2 == 1:
+                    v.append("  + ")
+                if B0+j >= 0 and (2*B0) % 2 == 1:
+                    v.append(" + ")
             else:
-                v.append("-")
+                if B0+j < 0 and (2*B0) % 2 == 0:
+                    v.append(" -")
+                if B0+j >= 0 and (2*B0) % 2 == 0:
+                    v.append("-")
+                if B0+j < 0 and (2*B0) % 2 == 1:
+                    v.append("  - ")
+                if B0+j >= 0 and (2*B0) % 2 == 1:
+                    v.append(" - ")
         X = np.append(X,v)
     X = X.reshape(n+1,A0-B0+1)
-    print(X)
-
+#    print(X)
+    return X
 
 ###########################################################
 # The associated A-parameter for E.
@@ -1932,7 +1971,7 @@ def Is_Arthur(m,T):
                         for _ in range(k[i]-k[i+1]):
                             psi0.append((i+1,i+1))
                     psi = tuple(psi0)
-                    Pi = Packet(psi,+1)
+                    Pi = A_packet(psi,+1)
                     f1 = 0
                     for E in Pi:
                         if rep(E) == (m,T):
@@ -1948,7 +1987,7 @@ def Is_Arthur(m,T):
                         for _ in range(k[i]-k[i+1]):        
                             psi0.append((i+2,i+1))
                     psi = tuple(psi0)
-                    Pi = Packet(psi,+1)
+                    Pi = A_packet(psi,+1)
                     f1 = 0
                     for E in Pi:
                         if rep(E) == (m,T):
@@ -1968,17 +2007,17 @@ def Is_Arthur(m,T):
 # decomposition of Speh times Arthur.
 ###########################################################
 
-def decomp(a,b,E):
+def decomp(ab,E):
     """
     Decomposition of Speh(a,b) \rtimes rep(E).
-    Input: (a,b,E)
-        a (positive integer)
-        b (positive integer)
+    Input: (ab,E)
+        ab (= (a,b), two positive integers)
         E (extended multi-segment)
     Output: Pi
         Pi (list of extended multi-segments)
             Speh(a,b) \rtimes rep(E) = \oplus_{E1 in Pi} rep(E1).
     """
+    a = ab[0]; b = ab[1]
     A = (a+b)/2-1; B = (a-b)/2
     c = 0
     for c in range(len(E)):
@@ -2004,7 +2043,11 @@ def decomp(a,b,E):
             E0.insert(c,([A,B],l,-1))
             E0 = tuple(E0)
             Pi.append(E0) 
-    Pi = list(filter(lambda F: xu(F), Pi))
+    s = 1
+    for i in range(len(E)): 
+        b = E[i][0][0]-E[i][0][1]+1
+        s = (-1)^(int(b/2) + E[i][1]) * E[i][2]^b * s
+    Pi = list(filter(lambda F: nonzero(F,s), Pi))
     return Pi
 
 
@@ -2012,21 +2055,21 @@ def decomp(a,b,E):
 # socle of Speh times Arthur.
 ###########################################################
 
-def soc(s,a,b,E):
+def soc(s,ab,E):
     """
     Socle of Speh(a,b)||^{s} \rtimes rep(E).
-    Input: (s,a,b,E)
+    Input: (s,ab,E)
         s (real number)
-        a (positive integer)
-        b (positive integer)
+        ab (= (a,b), two positive integers)
         E (extended multi-segment)
     Output: Pi
         Pi (list of (m,T))
             soc(Speh(a,b)||^{s} \rtimes rep(E)) = \oplus_{(m,T) in Pi} (m,T).
     """
+    a = ab[0]; b = ab[1]
     Pi = []
     if s == 0:
-        Pi1 = decomp(a,b,E)
+        Pi1 = decomp((a,b),E)
         for E1 in Pi1:
             Pi.append(rep(E1))
         return Pi
@@ -2118,7 +2161,7 @@ def soc(s,a,b,E):
                 L.append(k)
                 i = i+1
         Cr = list(reversed(C)); Lr = list(reversed(L))                
-        Pi1 = decomp(int(a-2*s),b,E)
+        Pi1 = decomp((int(a-2*s),b),E)
         for E1 in Pi1:
             m1,T1 = rep(E1)
             L1 = []
@@ -2168,7 +2211,7 @@ def soc(s,a,b,E):
                 L.append(k)
                 i = i+1
         Cr = list(reversed(C)); Lr = list(reversed(L))                
-        Pi1 = decomp(a,int(b+2*s),E)
+        Pi1 = decomp((a,int(b+2*s)),E)
         for E1 in Pi1:
             m1,T1 = rep(E1)
             L1 = []
@@ -2205,37 +2248,37 @@ def soc(s,a,b,E):
 # Speh times Arthur: irreducibility and first reducible points.
 ###################################################################
 
-def Is_irred(s,a,b,E):
+def Is_irred(s,ab,E):
     """
     Irreduciblity of Speh(a,b)||^{s} \rtimes rep(E).
     Input: (s,a,b,E)
         s (real number)
-        a (positive integer)
-        b (positive integer)
+        ab (= (a,b), two positive integers)
         E (extended multi-segment)
     Output: True or False
         True <=> Speh(a,b)||^{s} \rtimes rep(E) is irreducible.
     """
-    Pi1 = soc(s,a,b,E); Pi2 = soc(-s,a,b,E)
+    a = ab[0]; b = ab[1]
+    Pi1 = soc(s,(a,b),E); Pi2 = soc(-s,(a,b),E)
     return len(Pi1) == 1 and len(Pi2) == 1 and Pi1 == Pi2
 
-def FRP(a,b,E):
+def FRP(ab,E):
     """
     First reducibility point for Speh(a,b)||^{s} \rtimes rep(E).
     Input: (s,a,b,E)
-        a (positive integer)
-        b (positive integer)
+        ab (= (a,b), two positive integers)
         E (extended multi-segment)
     Output: s
         s (non-negative real number)
             the minimal non-negative real number  
             such that Speh(a,b)||^{s} \rtimes rep(E) is reducible.
     """
+    a = ab[0]; b = ab[1]
     if (a-b - 2*E[0][0][0]) % 2 == 0:
         s = 0
     else: 
         s = 1/2
-    while Is_irred(s,a,b,E):
+    while Is_irred(s,(a,b),E):
         s = s+1
     return s
 
